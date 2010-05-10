@@ -112,7 +112,7 @@ An object of class \code{kmeans}, just as produced by \code{\link{kmeans}}.
   time.new <- system.time(print(bigkmeans(x, 2, nstart=5)$centers))
   gc()
   y <- x[,]
-  rm(x)
+  rm(x)
   gc(reset=TRUE)
   time.old <- system.time(print(kmeans(y, 2, nstart=5)$centers))
   gc()
