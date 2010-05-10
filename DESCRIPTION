@@ -1,12 +1,13 @@
 Package: biganalytics
-Version: 1.0.10
-Date: 2010-05-05
+Version: 1.0.12
+Date: 2010-05-10
 Title: A library of utilities for big.matrix objects of package
         bigmemory.
 Author: John W. Emerson <jayemerson@gmail.com> and Michael J. Kane
         <kaneplusplus@gmail.com>
 Maintainer: Jay and Mike <bigmemoryauthors@gmail.com>
 Depends: methods, stats, utils, bigmemory (>= 4.0.0)
+LinkingTo: bigmemory
 Suggests: foreach, biglm
 Description: This package extends the bigmemory package with various
         analytics. Functions bigkmeans and binit may also be used with
@@ -18,6 +19,6 @@ License: LGPL-3
 Copyright: (C) 2010 John W. Emerson and Michael J. Kane
 URL: http://www.bigmemory.org
 LazyLoad: yes
-Packaged: 2010-05-05 17:24:48 UTC; jay
+Packaged: 2010-05-10 15:51:19 UTC; jay
 Repository: CRAN
-Date/Publication: 2010-05-06 05:39:55
+Date/Publication: 2010-05-10 19:27:33
