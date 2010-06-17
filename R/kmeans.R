@@ -13,7 +13,9 @@ bigkmeans <- function(x, centers, iter.max = 10, nstart = 1) {
   getcenters <- function(x, k, nstart) {
     n <- nrow(x)
     centers <- list(x[sample(1:n, k),,drop=FALSE])
-    for (ii in 1:(10+2^k)) {
+    nchecks <- 1000
+    if (k<=10) nchecks <- 10 + 2^k
+    for (ii in 1:nchecks) {
       if (any(duplicated(centers[[length(centers)]]))) {
         centers[[length(centers)]] <- x[sample(1:n, k),,drop=FALSE]
       } else break;
@@ -24,7 +26,7 @@ bigkmeans <- function(x, centers, iter.max = 10, nstart = 1) {
     if (nstart>1) {
       for (i in 2:nstart) {
         centers[[length(centers)+1]] <- x[sample(1:n, k),,drop=FALSE]
-        for (ii in 1:(10+2^k)) {
+        for (ii in 1:nchecks) {
           if (any(duplicated(centers[[length(centers)]]))) {
             centers[[length(centers)]] <- x[sample(1:n, k),,drop=FALSE]
           } else break;
