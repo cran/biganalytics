@@ -73,7 +73,7 @@ dataFrameGenerator=function(data, cols, levelList, getNextChunk)
 }
 
 CreateNextDataFrameGenerator = function( formula, data, chunksize, fc, 
-  getNextChunkFunc )
+  getNextChunkFunc, ...)
 {
   if (!is.null(chunksize) && is.null(getNextChunkFunc))
   {
@@ -99,7 +99,10 @@ CreateNextDataFrameGenerator = function( formula, data, chunksize, fc,
     }
     names(levelList)=fc
   }
-  vars = GetVarsFromFormula(formula, colnames(data))
+  # extract the weights
+  vars = all.vars(formula)
+  if (!is.null( list(...)[['weights']]))
+    vars = c(vars, all.vars(list(...)[['weights']]))
   cols = bigmemory:::mmap(vars, colnames(data))
   return(dataFrameGenerator(data, cols, levelList, getNextChunkFunc))
 }
@@ -109,7 +112,7 @@ bigglm.big.matrix = function( formula, data, chunksize=NULL, ..., fc=NULL,
 {
   require('biglm')
   getNextDataFrame = CreateNextDataFrameGenerator(formula, data, 
-    chunksize, fc, getNextChunkFunc)
+    chunksize, fc, getNextChunkFunc, ...)
   return(bigglm(formula=formula, data=getNextDataFrame, chunksize=chunksize,
     ... ))
 }
@@ -120,7 +123,7 @@ biglm.big.matrix = function( formula, data, chunksize=NULL, ..., fc=NULL,
 {
   require('biglm')
   getNextDataFrame = CreateNextDataFrameGenerator(formula, data,
-    chunksize, fc, getNextChunkFunc)
+    chunksize, fc, getNextChunkFunc, ...)
   data = getNextDataFrame(FALSE)
   blm = biglm(formula=formula, data=data, ...)
   data = getNextDataFrame(FALSE)
