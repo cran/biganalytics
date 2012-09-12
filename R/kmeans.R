@@ -114,7 +114,7 @@ bigkmeans <- function(x, centers, iter.max = 10, nstart = 1) {
 
     # Note that at this point, we're on a worker; I use a local big.matrix
     # object for centers to make the C++ code easier [][] matrix notation.
-
+    require(bigmemory)
     require(biganalytics)
     center <- big.matrix(nrow(cen), ncol(cen), type="double")
     center[,] <- cen
