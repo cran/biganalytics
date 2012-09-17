@@ -4,7 +4,7 @@ setGeneric('colmin', function(x, cols=NULL, na.rm=FALSE)
 
 setMethod('colmin', signature(x='big.matrix'),
   function(x, cols=NULL, na.rm=FALSE) {
-    thistype = .Call("CGetType", x@address)
+    thistype = .Call("CGetType", x@address, PACKAGE="bigmemory")
     cols <- bigmemory:::cleanupcols(cols, ncol(x), colnames(x))
     #if (is.null(cols)) cols = 1:ncol(x)
     #if (is.character(cols)) cols <- mmap(cols, colnames(x))
@@ -26,7 +26,7 @@ setGeneric('colmax', function(x, cols=NULL, na.rm=FALSE)
 # TODO: Can this be optimized to go through a set of rows only once?
 setMethod('colmax', signature(x='big.matrix'),
   function(x, cols=NULL, na.rm=FALSE) {
-    thistype = .Call("CGetType", x@address)
+    thistype = .Call("CGetType", x@address, PACKAGE="bigmemory")
     cols <- bigmemory:::cleanupcols(cols, ncol(x), colnames(x))
     ret = .Call("CMaxColmain", as.integer(thistype), 
       x@address, as.double(cols), na.rm)
@@ -51,7 +51,7 @@ setMethod('colprod', signature(x='big.matrix'),
     cols <- bigmemory:::cleanupcols(cols, ncol(x), colnames(x))
     #if (is.null(cols)) cols = 1:ncol(x)
     #if (is.character(cols)) cols <- mmap(cols, colnames(x))
-    thistype = .Call("CGetType", x@address)
+    thistype = .Call("CGetType", x@address, PACKAGE="bigmemory")
     ret = .Call("CProdColmain", as.integer(thistype), x@address, 
       as.double(cols), na.rm)
     if (!is.null(colnames(x))) 
@@ -70,7 +70,7 @@ setGeneric('colsum', function(x, cols=NULL, na.rm=FALSE)
 setMethod('colsum', signature(x='big.matrix'),
   function(x, cols=NULL, na.rm=FALSE) {
     cols <- bigmemory:::cleanupcols(cols, ncol(x), colnames(x))
-    thistype = .Call("CGetType", x@address)
+    thistype = .Call("CGetType", x@address, PACKAGE="bigmemory")
     ret = .Call("CSumColmain", as.integer(thistype), x@address, 
       as.double(cols), na.rm)
     if (!is.null(colnames(x))) 
@@ -113,7 +113,7 @@ setMethod('colmean', signature(x='big.matrix'),
     cols <- bigmemory:::cleanupcols(cols, ncol(x), colnames(x))
     #if (is.null(cols)) cols=1:ncol(x)
     #if (is.character(cols)) cols <- mmap(cols, colnames(x))
-    thistype = .Call("CGetType", x@address)
+    thistype = .Call("CGetType", x@address, PACKAGE="bigmemory")
     ret = .Call("CMeanColmain", as.integer(thistype), x@address, 
       as.double(cols), na.rm)
     if (!is.null(colnames(x))) 
@@ -137,7 +137,7 @@ setMethod('colvar', signature(x='big.matrix'),
     cols <- bigmemory:::cleanupcols(cols, ncol(x), colnames(x))
     #if (is.null(cols)) cols = 1:ncol(x)
     #if (is.character(cols)) cols <- mmap(cols, colnames(x))
-    thistype = .Call("CGetType", x@address)
+    thistype = .Call("CGetType", x@address, PACKAGE="bigmemory")
     ret = .Call("CVarColmain", as.integer(thistype), x@address, 
       as.double(cols), na.rm)
     if (!is.null(colnames(x))) 
