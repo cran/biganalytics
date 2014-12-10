@@ -41,8 +41,8 @@
 
 template<typename T, typename MatrixType>
 SEXP kmeansMatrixEuclid(MatrixType x, index_type n, index_type m,
-        SEXP pcen, SEXP pclust, SEXP pclustsizes,
-        SEXP pwss, SEXP itermax)
+                  SEXP pcen, SEXP pclust, SEXP pclustsizes,
+                  SEXP pwss, SEXP itermax)
 {
 
   index_type j, col, nchange;
@@ -75,54 +75,55 @@ SEXP kmeansMatrixEuclid(MatrixType x, index_type n, index_type m,
   // being used for the vectors, for example.
   // Before starting the loop, we only have cent (centers) as passed into the function.
   // Calculate clust and clustsizes, then update cent as centroids.
-
+  
   for (cl=0; cl<k; cl++) clustsizes[0][cl] = 0.0;
   for (j=0; j<n; j++) {
-      bestcl = 0;
-      for (cl=0; cl<k; cl++) {
-          d[cl] = 0.0;
-          for (col=0; col<m; col++) {
-              temp = (double)x[col][j] - cent[col][cl];
-              d[cl] += temp * temp;
-          }
-          if (d[cl]<d[bestcl]) bestcl = cl;
+    bestcl = 0;
+    for (cl=0; cl<k; cl++) {
+      d[cl] = 0.0;
+      for (col=0; col<m; col++) {
+        temp = (double)x[col][j] - cent[col][cl];
+        d[cl] += temp * temp;
       }
-      clust[0][j] = bestcl + 1;          // Saving the R cluster number, not the C index.
-      clustsizes[0][bestcl]++;
-      for (col=0; col<m; col++)
-          tempcent[col][bestcl] += (double)x[col][j];
+      if (d[cl]<d[bestcl]) bestcl = cl;
+    }
+    clust[0][j] = bestcl + 1;          // Saving the R cluster number, not the C index.
+    clustsizes[0][bestcl]++;
+    for (col=0; col<m; col++)
+      tempcent[col][bestcl] += (double)x[col][j];
   }
   for (cl=0; cl<k; cl++)
-      for (col=0; col<m; col++)
-          cent[col][cl] = tempcent[col][cl] / clustsizes[0][cl];
+    for (col=0; col<m; col++)
+      cent[col][cl] = tempcent[col][cl] / clustsizes[0][cl];
 
   do {
 
-      nchange = 0;
-      for (j=0; j<n; j++) { // For each of my points, this is offset from hash position
+    nchange = 0;
+    for (j=0; j<n; j++) { // For each of my points, this is offset from hash position
 
-          oldcluster = clust[0][j] - 1;
-          bestcl = 0;
-          for (cl=0; cl<k; cl++) {         // Consider each of the clusters
-              d[cl] = 0.0;                   // We'll get the distance to this cluster.
-              for (col=0; col<m; col++) {    // Loop over the dimension of the data
-                  temp = (double)x[col][j] - cent[col][cl];
-                  d[cl] += temp * temp;
-              }
-              if (d[cl]<d[bestcl]) bestcl = cl;
-          } // End of looking over the clusters for this j
+      oldcluster = clust[0][j] - 1;
+      bestcl = 0;
+      for (cl=0; cl<k; cl++) {         // Consider each of the clusters
+        d[cl] = 0.0;                   // We'll get the distance to this cluster.
+        for (col=0; col<m; col++) {    // Loop over the dimension of the data
+          temp = (double)x[col][j] - cent[col][cl];
+          d[cl] += temp * temp;
+        }
+        if (d[cl]<d[bestcl]) bestcl = cl;
+      } // End of looking over the clusters for this j
 
-          if (d[bestcl] < d[oldcluster]) {           // MADE A CHANGE!
-              newcluster = bestcl;
-              clust[0][j] = newcluster + 1;
-              nchange++;
-              clustsizes[0][newcluster]++;
-              clustsizes[0][oldcluster]--;
-              for (col=0; col<m; col++) {
-                  cent[col][oldcluster] += ( cent[col][oldcluster] - (double)x[col][j] ) / clustsizes[0][oldcluster];
-                  cent[col][newcluster] += ( (double)x[col][j] - cent[col][newcluster] ) / clustsizes[0][newcluster];
-              }
-          }
+      if (d[bestcl] < d[oldcluster]) {           // MADE A CHANGE!
+        newcluster = bestcl;
+        clust[0][j] = newcluster + 1;
+        nchange++;
+        clustsizes[0][newcluster]++;
+        clustsizes[0][oldcluster]--;
+        for (col=0; col<m; col++) {
+          cent[col][oldcluster] += ( cent[col][oldcluster] - (double)x[col][j] ) / clustsizes[0][oldcluster];
+          cent[col][newcluster] += ( (double)x[col][j] - cent[col][newcluster] ) / clustsizes[0][newcluster];
+        }
+      }
+
     } // End of this pass over my points.
 
     iter[0]++;
@@ -133,10 +134,10 @@ SEXP kmeansMatrixEuclid(MatrixType x, index_type n, index_type m,
   // Collect the sums of squares now that we're done.
   for (cl=0; cl<k; cl++) ss[0][cl] = 0.0;
   for (j=0; j<n; j++) {
-      for (col=0; col<m; col++) {
-          cl = clust[0][j]-1;
-          temp = (double)x[col][j] - cent[col][cl];
-          ss[0][cl] += temp * temp;
+    for (col=0; col<m; col++) {
+      cl = clust[0][j]-1;
+      temp = (double)x[col][j] - cent[col][cl];
+      ss[0][cl] += temp * temp;
     }
   }
 
@@ -288,96 +289,96 @@ extern "C"
 {
 
 SEXP kmeansBigMatrix(SEXP x, SEXP cen, SEXP clust, SEXP clustsizes,
-            SEXP wss, SEXP itermax, int *dist)
+                     SEXP wss, SEXP itermax, int *dist)
 {
-    BigMatrix *pMat =  reinterpret_cast<BigMatrix*>(R_ExternalPtrAddr(x));
-    int dist_calc = *dist;
-    if (pMat->separated_columns())
+  BigMatrix *pMat =  reinterpret_cast<BigMatrix*>(R_ExternalPtrAddr(x));
+  int dist_calc = *dist;
+  if (pMat->separated_columns())
+  {
+    switch (pMat->matrix_type())
     {
-        switch (pMat->matrix_type())
-        {
-            case 1:
-                if (dist_calc==0) {
-                    return kmeansMatrixEuclid<char>(SepMatrixAccessor<char>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                } else {
-                    return kmeansMatrixCosine<char>(SepMatrixAccessor<char>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                }
-            case 2:
-                if (dist_calc==0) {
-                    return kmeansMatrixEuclid<short>(SepMatrixAccessor<short>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                } else {
-                    return kmeansMatrixCosine<short>(SepMatrixAccessor<short>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                }
-            case 4:
-                if (dist_calc==0) {
-                    return kmeansMatrixEuclid<int>(SepMatrixAccessor<int>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                } else {
-                    return kmeansMatrixCosine<int>(SepMatrixAccessor<int>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                }
-            case 8:
-                if (dist_calc==0) {
-                    return kmeansMatrixEuclid<double>(SepMatrixAccessor<double>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                } else {
-                    return kmeansMatrixCosine<double>(SepMatrixAccessor<double>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                }
-        }
+      case 1:
+          if (dist_calc==0) {
+              return kmeansMatrixEuclid<char>(SepMatrixAccessor<char>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          } else {
+              return kmeansMatrixCosine<char>(SepMatrixAccessor<char>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          }
+      case 2:
+          if (dist_calc==0) {
+              return kmeansMatrixEuclid<short>(SepMatrixAccessor<short>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          } else {
+              return kmeansMatrixCosine<short>(SepMatrixAccessor<short>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          }
+      case 4:
+          if (dist_calc==0) {
+              return kmeansMatrixEuclid<int>(SepMatrixAccessor<int>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          } else {
+              return kmeansMatrixCosine<int>(SepMatrixAccessor<int>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          }
+      case 8:
+          if (dist_calc==0) {
+              return kmeansMatrixEuclid<double>(SepMatrixAccessor<double>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          } else {
+              return kmeansMatrixCosine<double>(SepMatrixAccessor<double>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          }
     }
-    else
+  }
+  else
+  {
+    switch (pMat->matrix_type())
     {
-        switch (pMat->matrix_type())
-        {
-            case 1:
-                if (dist_calc==0) {
-                    return kmeansMatrixEuclid<char>(MatrixAccessor<char>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                } else {
-                    return kmeansMatrixCosine<char>(MatrixAccessor<char>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                }
-            case 2:
-                if (dist_calc==0) {
-                    return kmeansMatrixEuclid<short>(MatrixAccessor<short>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                } else {
-                    return kmeansMatrixCosine<short>(MatrixAccessor<short>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                }
-            case 4:
-                if (dist_calc==0) {
-                    return kmeansMatrixEuclid<int>(MatrixAccessor<int>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                } else {
-                    return kmeansMatrixCosine<int>(MatrixAccessor<int>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                }
-            case 8:
-                if (dist_calc==0) {
-                    return kmeansMatrixEuclid<double>(MatrixAccessor<double>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                } else {
-                    return kmeansMatrixCosine<double>(MatrixAccessor<double>(*pMat),
-                            pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
-                }
-        }
+      case 1:
+          if (dist_calc==0) {
+              return kmeansMatrixEuclid<char>(MatrixAccessor<char>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          } else {
+              return kmeansMatrixCosine<char>(MatrixAccessor<char>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          }
+      case 2:
+          if (dist_calc==0) {
+              return kmeansMatrixEuclid<short>(MatrixAccessor<short>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          } else {
+              return kmeansMatrixCosine<short>(MatrixAccessor<short>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          }
+      case 4:
+          if (dist_calc==0) {
+              return kmeansMatrixEuclid<int>(MatrixAccessor<int>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          } else {
+              return kmeansMatrixCosine<int>(MatrixAccessor<int>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          }
+      case 8:
+          if (dist_calc==0) {
+              return kmeansMatrixEuclid<double>(MatrixAccessor<double>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          } else {
+              return kmeansMatrixCosine<double>(MatrixAccessor<double>(*pMat),
+                      pMat->nrow(), pMat->ncol(), cen, clust, clustsizes, wss, itermax);
+          }
     }
-    return R_NilValue;
+  }
+  return R_NilValue;
 }
 
 SEXP kmeansRIntMatrix(SEXP x, SEXP cen, SEXP clust, SEXP clustsizes,
-        SEXP wss, SEXP itermax, int *dist)
+                      SEXP wss, SEXP itermax, int *dist)
 {
-    index_type numRows = static_cast<index_type>(nrows(x));
-    index_type numCols = static_cast<index_type>(ncols(x));
-    int dist_calc = *dist;
-    MatrixAccessor<int> mat(INTEGER_DATA(x), numRows);
+  index_type numRows = static_cast<index_type>(nrows(x));
+  index_type numCols = static_cast<index_type>(ncols(x));
+  int dist_calc = *dist;
+  MatrixAccessor<int> mat(INTEGER_DATA(x), numRows);
     if (dist_calc==0) {
         return kmeansMatrixEuclid<int, MatrixAccessor<int> >(mat,
                 numRows, numCols, cen, clust, clustsizes, wss, itermax);
@@ -388,12 +389,12 @@ SEXP kmeansRIntMatrix(SEXP x, SEXP cen, SEXP clust, SEXP clustsizes,
 }
 
 SEXP kmeansRNumericMatrix(SEXP x, SEXP cen, SEXP clust, SEXP clustsizes,
-        SEXP wss, SEXP itermax, int *dist)
+                          SEXP wss, SEXP itermax, int *dist)
 {
-    index_type numRows = static_cast<index_type>(nrows(x));
-    index_type numCols = static_cast<index_type>(ncols(x));
-    int dist_calc = *dist;
-    MatrixAccessor<double> mat(NUMERIC_DATA(x), numRows);
+  index_type numRows = static_cast<index_type>(nrows(x));
+  index_type numCols = static_cast<index_type>(ncols(x));
+  int dist_calc = *dist;
+  MatrixAccessor<double> mat(NUMERIC_DATA(x), numRows);
     if (dist_calc==0) {
         return kmeansMatrixEuclid<double, MatrixAccessor<double> >(mat,
                 numRows, numCols, cen, clust, clustsizes, wss, itermax);
