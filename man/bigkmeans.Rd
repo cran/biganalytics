@@ -6,7 +6,7 @@ k-means cluster analysis without the memory overhead, and possibly
 in parallel using shared memory.
 }
 \usage{
-bigkmeans(x, centers, iter.max = 10, nstart = 1)
+bigkmeans(x, centers, iter.max=10, nstart=1, dist="euclid")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -14,6 +14,7 @@ bigkmeans(x, centers, iter.max = 10, nstart = 1)
   \item{centers}{a scalar denoting the number of clusters, or for k clusters, a k by \code{ncol(x)} matrix.}
   \item{iter.max}{the maximum number of iterations.}
   \item{nstart}{number of random starts, to be done in parallel if there is a registered backend (see below).}
+  \item{dist}{the distance function. Can be "euclid" or "cosine".}
 }
 \details{
 The real benefit is the lack of memory overhead compared to the standard
@@ -76,17 +77,17 @@ An object of class \code{kmeans}, just as produced by \code{\link{kmeans}}.
 
   library(bigmemory)
 
-  x <- big.matrix(100000, 3, init=0, type="double")
-  x[seq(1,100000,by=2),] <- rnorm(150000)
-  x[seq(2,100000,by=2),] <- rnorm(150000, 5, 1)
+  x <- big.matrix(100, 3, init=0, type="double")
+  x[seq(1,100,by=2),] <- rnorm(3*50)
+  x[seq(2,100,by=2),] <- rnorm(3*50, 100, 1)
   head(x)
-  ans <- bigkmeans(x, 1)              # One cluster isn't always allowed
-                                      # but is convenient.
+  ans <- bigkmeans(x, 1) # One cluster isn't always allowed
+                                        # but is convenient.
   ans$centers
   ans$withinss
   ans$size
   apply(x, 2, mean)
-  ans <- bigkmeans(x, 2, nstart=5)    # Sequential multiple starts.
+  ans <- bigkmeans(x, 2, nstart=5) # Sequential multiple starts.
   class(ans)
   names(ans)
   ans$centers
@@ -101,7 +102,7 @@ An object of class \code{kmeans}, just as produced by \code{\link{kmeans}}.
     library(doSNOW)
     cl <- makeCluster(3, type="SOCK")
     registerDoSNOW(cl)
-    ans <- bigkmeans(x, 2, nstart=5)
+    ans <- bigkmeans(x, 2, nstart=5) 
   }
 
   # Both the following are run iteratively, but with less memory overhead
@@ -109,7 +110,7 @@ An object of class \code{kmeans}, just as produced by \code{\link{kmeans}}.
   # fair, because the big.matrix objects aren't reflected in the gc()
   # summary.  But the savings is there.
   gc(reset=TRUE)
-  time.new <- system.time(print(bigkmeans(x, 2, nstart=5)$centers))
+  time.new <- system.time(print(bigkmeans(x,2,nstart=5)$centers))
   gc()
   y <- x[,]
   rm(x)

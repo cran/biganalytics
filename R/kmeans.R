@@ -1,9 +1,17 @@
 
-bigkmeans <- function(x, centers, iter.max = 10, nstart = 1) {
+bigkmeans <- function(x, centers, iter.max = 10, nstart = 1, dist='euclid') {
 
-  require(foreach)
   if (is.null(getDoParName())) {
     registerDoSEQ() # A little hack to avoid the foreach warning 1st time.
+  }
+
+  dist_calc = 0
+  if (dist=='euclid') {
+      dist_calc = 0
+  } else if (dist=='cosine') {
+      dist_calc = 1
+  } else {
+      stop("'euclid' or 'cosine' are valid. Check your argument.\n")
   }
 
   ################################################################
@@ -43,6 +51,8 @@ bigkmeans <- function(x, centers, iter.max = 10, nstart = 1) {
   # A function for aggregating results as foreach is running, to avoid
   # memory overhead.
   choosebest <- function(a, b) {
+    if (!is.na(sum(a$withinss)) & is.na(sum(b$withinss))) return(a)
+    else if (is.na(sum(a$withinss)) & !is.na(sum(b$withinss))) return(b)
     if ( sum(a$withinss) < sum(b$withinss) ) {
       return(a)
     } else {
@@ -110,12 +120,8 @@ bigkmeans <- function(x, centers, iter.max = 10, nstart = 1) {
 
   # Do the work, possibly in parallel with nstart>1 and a registered
   # parallel backend.
-  ans <- foreach(cen=centers, .combine="choosebest") %dopar% {
-
-    # Note that at this point, we're on a worker; I use a local big.matrix
-    # object for centers to make the C++ code easier [][] matrix notation.
-    require(bigmemory)
-    require(biganalytics)
+  ans <- foreach(cen=centers, .combine="choosebest", 
+                 .packages=c("bigmemory", "biganalytics")) %dopar% {
     center <- big.matrix(nrow(cen), ncol(cen), type="double")
     center[,] <- cen
     clust <- big.matrix(nr, 1, type="integer")
@@ -126,18 +132,18 @@ bigkmeans <- function(x, centers, iter.max = 10, nstart = 1) {
       if (mattype==4) {
         res <- .Call("kmeansRIntMatrix", x,
                      center@address, clust@address, clustsizes@address,
-                     wss@address, as.integer(iter.max))
+                     wss@address, as.integer(iter.max), as.integer(dist_calc))
       } else {
         res <- .Call("kmeansRNumericMatrix", x,
                      center@address, clust@address, clustsizes@address,
-                     wss@address, as.integer(iter.max))
+                     wss@address, as.integer(iter.max), as.integer(dist_calc))
       }
     } else {
       # .Call with the big.matrix
       x <- attach.big.matrix(xdesc)
       res <- .Call("kmeansBigMatrix", x@address,
                    center@address, clust@address, clustsizes@address,
-                   wss@address, as.integer(iter.max))
+                   wss@address, as.integer(iter.max), as.integer(dist_calc))
     }
 
     temp <- list(cluster=clust[,],

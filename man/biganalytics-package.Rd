@@ -7,7 +7,7 @@ biganalytics: A library of utilities for big.matrix objects of package bigmemory
 Some work with R matrices, independently of bigmemory.
 }
 \description{
-This package extends the bigmemory package with various analytics.  In addition
+Extend the \pkg{bigmemory} package with various analytics.  In addition
 to the more obvious summary statistics (see \code{\link{colmean}}, etc...),
 \pkg{biganalytics} offers \code{\link{biglm.big.matrix}},
 \code{\link{bigglm.big.matrix}}, \code{\link{bigkmeans}},
@@ -19,10 +19,10 @@ providing gains in speed and memory-efficiency.
 \tabular{ll}{
 Package: \tab biganalytics\cr
 Type: \tab Package\cr
-Version: \tab 1.1.1\cr
-Date: \tab 2012-09-20\cr
-License: \tab LGPL-3\cr
-Copyright: \tab (C) 2013 John W. Emerson and Michael J. Kane\cr
+Version: \tab 1.1.12\cr
+Date: \tab 2015-10-20\cr
+License: \tab LGPL-3 | Apache License 2.0\cr
+Copyright: \tab (C) 2015 John W. Emerson and Michael J. Kane\cr
 URL: \tab http://www.bigmemory.org\cr
 LazyLoad: \tab yes\cr
 }
