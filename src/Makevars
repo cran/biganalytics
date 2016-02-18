@@ -1,2 +1,2 @@
-PKG_CPPFLAGS=-I../include
-
+PKG_CPPFLAGS=-I../include -DLINUX
+PKG_LIBS=-lrt
