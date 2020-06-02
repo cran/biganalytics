@@ -12,6 +12,7 @@
 #' conforming to what you would expect from \code{apply()}.
 #' @param FUN the function to apply.
 #' @param \dots other parameters to pass to the FUN parameter.
+#' @param simplify see the base::apply documentation.
 #' @docType methods
 #' @export
 #' @examples
@@ -22,7 +23,7 @@
 #' x[,] <- round(rnorm(10))
 #' biganalytics::apply(x, 1, mean)
 setMethod('apply', signature(X="big.matrix"),
-  function(X, MARGIN, FUN, ...) return(bmapply(X, MARGIN, FUN, ...)))
+  function(X, MARGIN, FUN, ..., simplify) return(bmapply(X, MARGIN, FUN, ...)))
 
 bmapply <- function(X, MARGIN, FUN, ...)
 {
